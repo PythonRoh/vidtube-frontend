@@ -5,10 +5,10 @@ import { BASE_URL } from "../../constants";
 
 //  Initial state for the comment slice
 const initialState = {
-  loading: false,   // To manage loading spinner while fetching comments
-  comments: [],     // Array to hold comments for a video
+  loading: false, // To manage loading spinner while fetching comments
+  comments: [], // Array to hold comments for a video
   totalComments: null, // Total count of comments (used for pagination/UI)
-  hasNextPage: false,  // Boolean flag for pagination
+  hasNextPage: false, // Boolean flag for pagination
 };
 
 //  CREATE A COMMENT
@@ -17,7 +17,7 @@ export const createAComment = createAsyncThunk(
   "createAComment", // action type: comment/createAComment
   async ({ videoId, content }) => {
     try {
-      const response = await axiosInstance.post(`/comment/${videoId}`, {
+      const response = await axiosInstance.post(`/comments/${videoId}`, {
         content,
       });
       return response.data.data; // Returns the new comment object
@@ -34,7 +34,7 @@ export const editAComment = createAsyncThunk(
   "editAComment", // action type: comment/editAComment
   async ({ commentId, content }) => {
     try {
-      const response = await axiosInstance.patch(`/comment/c/${commentId}`, {
+      const response = await axiosInstance.patch(`/comments/${commentId}`, {
         content,
       });
       toast.success(response.data?.message);
@@ -52,7 +52,7 @@ export const deleteAComment = createAsyncThunk(
   "deleteAComment", // action type: comment/deleteAComment
   async (commentId) => {
     try {
-      const response = await axiosInstance.delete(`/comment/c/${commentId}`);
+      const response = await axiosInstance.delete(`/comments/${commentId}`);
       toast.success(response.data.message);
       return response.data.data; // Contains { commentId: "..." }
     } catch (error) {
@@ -68,7 +68,7 @@ export const getVideoComments = createAsyncThunk(
   "getVideoComments", // action type: comment/getVideoComments
   async ({ videoId, page, limit }) => {
     // Construct paginated URL
-    const url = new URL(`${BASE_URL}/comment/${videoId}`);
+    const url = new URL(`${BASE_URL}/comments/${videoId}`);
     if (page) url.searchParams.set("page", page);
     if (limit) url.searchParams.set("limit", limit);
 

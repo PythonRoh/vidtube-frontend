@@ -1,10 +1,5 @@
-// Redux Toolkit utilities
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
-// Custom Axios instance (includes base URL and credentials)
 import axiosInstance from "../../helpers/axiosInstance";
-
-// Toast notification utility
 import toast from "react-hot-toast";
 
 // Initial state for the like slice
@@ -66,7 +61,7 @@ export const toggleCommentLike = createAsyncThunk(
 
 export const getLikedVideos = createAsyncThunk("getLikedVideos", async () => {
   try {
-    const response = await axiosInstance.get("likes/videos");
+    const response = await axiosInstance.get("/likes/videos");
     return response.data.data;
   } catch (error) {
     toast.error(error?.response?.data?.error);

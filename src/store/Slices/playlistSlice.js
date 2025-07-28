@@ -36,7 +36,6 @@ export const createAPlaylist = createAsyncThunk(
   }
 );
 
-
 //   ADD VIDEO TO PLAYLIST
 //   Sends a PATCH request to add a specific video to a playlist.
 
@@ -57,7 +56,6 @@ export const addVideoToPlaylist = createAsyncThunk(
     }
   }
 );
-
 
 //   REMOVE VIDEO FROM PLAYLIST
 //   Sends a PATCH request to remove a specific video from a playlist.
@@ -80,16 +78,18 @@ export const removeVideoFromPlaylist = createAsyncThunk(
   }
 );
 
+//   DELETE A PLAYLIST
+//   Deletes a specific playlist by ID.
 
-//   GET PLAYLIST BY ID
-//   Retrieves details of a playlist by its ID.
-
-export const getPlaylistById = createAsyncThunk(
-  "getPlaylistById",
+export const deletePlaylist = createAsyncThunk(
+  "deletePlaylist",
   async (playlistId) => {
     try {
-      const response = await axiosInstance.get(`/playlist/${playlistId}`);
-      return response.data.data;
+      const response = await axiosInstance.delete(`/playlist/${playlistId}`);
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+      return playlistId;
     } catch (error) {
       toast.error(error?.response?.data?.error);
       throw error;
@@ -116,7 +116,7 @@ export const getPlaylistsByUser = createAsyncThunk(
 //   UPDATE A PLAYLIST
 //   Updates the name and description of a playlist.
 
-export const upadtePlaylist = createAsyncThunk(
+export const updatePlaylist = createAsyncThunk(
   "upadtePlaylist",
   async ({ playlistId, name, description }) => {
     try {
@@ -135,6 +135,21 @@ export const upadtePlaylist = createAsyncThunk(
   }
 );
 
+//   GET ALL VIDEOS IN A PLAYLIST
+//   Fetches all videos in a specific playlist by ID.
+export const getPlaylistById = createAsyncThunk(
+  "getPlaylistById",
+  async (playlistId) => {
+    try {
+      const response = await axiosInstance.get(`/playlist/${playlistId}`);
+      return response.data.data;
+    } catch (error) {
+      toast.error(error?.response?.data?.error);
+      throw error;
+    }
+  }
+);
+
 // Playlist slice definition
 const playlistSlice = createSlice({
   name: "playlist", // Slice name for dev tools
@@ -143,9 +158,22 @@ const playlistSlice = createSlice({
   extraReducers: (builder) => {
     //   SET USER PLAYLISTS
     //   Sets the fetched playlists into state.
-
     builder.addCase(getPlaylistsByUser.fulfilled, (state, action) => {
       state.playlists = action.payload;
+    });
+
+    //  GET ALL VIDEOS IN A PLAYLIST
+    //  Sets the playlist data into state after fetching.
+    builder.addCase(getPlaylistById.fulfilled, (state, action) => {
+      state.playlist = action.payload;
+    });
+
+    //   DELETE A PLAYLIST
+    //   Removes a playlist from state after successful deletion.
+    builder.addCase(deletePlaylist.fulfilled, (state, action) => {
+      state.playlists = state.playlists.filter(
+        (playlist) => playlist._id !== action.payload
+      );
     });
   },
 });

@@ -1,10 +1,5 @@
-// Redux Toolkit utilities
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
-// Custom Axios instance (includes base URL, credentials, etc.)
 import axiosInstance from "../../helpers/axiosInstance";
-
-// Toast notifications
 import toast from "react-hot-toast";
 
 // Initial state for auth slice
@@ -115,13 +110,21 @@ export const getCurrentUser = createAsyncThunk("getCurrentUser", async () => {
 // UPDATE AVATAR
 // Updates the profile picture (avatar).
 
-export const updateAvatar = createAsyncThunk("updateAvatar", async (avatar) => {
+export const updateAvatar = createAsyncThunk("updateAvatar", async (file) => {
   try {
-    const response = await axiosInstance.patch("/users/update-avatar", avatar);
-    toast.success("Updated details successfully!!!");
+    const formData = new FormData();
+    formData.append("avatar", file); // must match multer field name
+
+    const response = await axiosInstance.patch("/users/avatar", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    toast.success("Avatar updated successfully!");
     return response.data.data;
   } catch (error) {
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.error || "Something went wrong!");
     throw error;
   }
 });
@@ -133,7 +136,7 @@ export const updateCoverImg = createAsyncThunk(
   async (coverImage) => {
     try {
       const response = await axiosInstance.patch(
-        "/users/update-coverImg",
+        "/users/cover-image?",
         coverImage
       );
       toast.success(response.data?.message);
@@ -145,7 +148,6 @@ export const updateCoverImg = createAsyncThunk(
   }
 );
 
-
 // UPDATE USER DETAILS
 // Updates profile info like name, email, etc.
 
@@ -153,7 +155,7 @@ export const updateUserDetails = createAsyncThunk(
   "updateUserDetails",
   async (data) => {
     try {
-      const response = await axiosInstance.patch("/users/update-user", data);
+      const response = await axiosInstance.patch("/users/update-account", data);
       toast.success("Updated details successfully!!!");
       return response.data;
     } catch (error) {
@@ -162,7 +164,6 @@ export const updateUserDetails = createAsyncThunk(
     }
   }
 );
-
 
 // AUTH SLICE
 // Contains reducers and extraReducers to handle above async actions.
@@ -179,7 +180,6 @@ const authSlice = createSlice({
 
   // Handle async actions (createAsyncThunk) using extraReducers
   extraReducers: (builder) => {
-
     //  REGISTER USER
     builder.addCase(createAccount.pending, (state) => {
       state.loading = true; // Show spinner/loading while register API is processing
@@ -195,7 +195,7 @@ const authSlice = createSlice({
     });
     builder.addCase(userLogin.fulfilled, (state, action) => {
       state.loading = false;
-      state.status = true;              // Set user as authenticated
+      state.status = true; // Set user as authenticated
       state.userData = action.payload; // Save user info from API response
     });
 
@@ -205,8 +205,8 @@ const authSlice = createSlice({
     });
     builder.addCase(userLogout.fulfilled, (state) => {
       state.loading = false;
-      state.status = false;     // User is no longer authenticated
-      state.userData = null;    // Clear stored user data
+      state.status = false; // User is no longer authenticated
+      state.userData = null; // Clear stored user data
     });
 
     //  GET CURRENT USER (e.g. on app load or refresh)
@@ -215,13 +215,13 @@ const authSlice = createSlice({
     });
     builder.addCase(getCurrentUser.fulfilled, (state, action) => {
       state.loading = false;
-      state.status = true;              // Mark user as authenticated
+      state.status = true; // Mark user as authenticated
       state.userData = action.payload; // Store current user data
     });
     builder.addCase(getCurrentUser.rejected, (state) => {
       state.loading = false;
-      state.status = false;    // Couldn't fetch user, maybe token expired
-      state.userData = null;   // Clear user data just in case
+      state.status = false; // Couldn't fetch user, maybe token expired
+      state.userData = null; // Clear user data just in case
     });
 
     //  UPDATE AVATAR
@@ -256,11 +256,8 @@ const authSlice = createSlice({
       state.loading = false;
       state.userData = action.payload; // Replace old user info with updated info
     });
-
-    
   },
 });
-
 
 // Export reducer to be used in the store
 export default authSlice.reducer;

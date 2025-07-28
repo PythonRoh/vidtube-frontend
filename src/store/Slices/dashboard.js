@@ -1,10 +1,5 @@
-// Redux Toolkit utilities
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
-// Custom Axios instance (includes base URL and credentials)
 import axiosInstance from "../../helpers/axiosInstance";
-
-// Toast notification utility
 import toast from "react-hot-toast";
 
 // Initial state for the dashboard slice
